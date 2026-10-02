@@ -1,0 +1,23 @@
+#!/bin/sh
+# Escape hatch: point Claude Code straight at Anthropic again (gateway not needed).
+# Usage: jev-bypass         removes the gateway setting
+#        jev-bypass connect puts it back
+SETTINGS="${CLAUDE_SETTINGS:-$HOME/.claude/settings.json}"
+python3 - "$SETTINGS" "${1:-bypass}" <<'PY'
+import json, os, shutil, sys
+path, action = sys.argv[1], sys.argv[2]
+d = json.load(open(path)) if os.path.exists(path) else {}
+if os.path.exists(path):
+    shutil.copy(path, path + ".jev-backup")
+env = d.setdefault("env", {})
+if action == "connect":
+    env["ANTHROPIC_BASE_URL"] = "http://127.0.0.1:8787"
+    msg = "Claude Code now goes through the Jev gateway (start new sessions to apply)."
+else:
+    env.pop("ANTHROPIC_BASE_URL", None)
+    msg = "Claude Code now goes straight to Anthropic (start new sessions to apply)."
+if not env:
+    del d["env"]
+json.dump(d, open(path, "w"), indent=2); open(path, "a").write("\n")
+print(msg)
+PY

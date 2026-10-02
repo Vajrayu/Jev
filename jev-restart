@@ -1,0 +1,3 @@
+#!/bin/sh
+# Restart the background gateway. Try this first if Claude Code can't connect.
+launchctl kickstart -k "gui/$(id -u)/com.yuvathefirst.jev-gateway" && sleep 2 && curl -s --max-time 3 http://127.0.0.1:8787/health && echo " <- gateway is back" || echo "still not responding: run jev-bypass"

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.yuvathefirst.jev-gateway</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/yuvathefirst/jev-claude/gateway/.venv/bin/python</string>
+    <string>-m</string><string>uvicorn</string>
+    <string>gateway:app</string>
+    <string>--host</string><string>127.0.0.1</string>
+    <string>--port</string><string>8787</string>
+  </array>
+  <key>WorkingDirectory</key><string>/Users/yuvathefirst/jev-claude/gateway</string>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+  <key>StandardOutPath</key><string>/Users/yuvathefirst/.jev-gateway/gateway.log</string>
+  <key>StandardErrorPath</key><string>/Users/yuvathefirst/.jev-gateway/gateway.log</string>
+</dict>
+</plist>

@@ -1,0 +1,47 @@
+#!/usr/bin/env python3
+"""Report Claude models that appeared on Anthropic's public models page since you last looked.
+
+Usage: jev-models-check            show new models (changes nothing)
+       jev-models-check --mark-seen  record what's on the page now as seen
+
+It never edits models/registry.json: a new model is discovered first, then you
+decide whether and where it belongs in the routing.
+"""
+import json, re, sys, urllib.request
+from pathlib import Path
+
+URL = "https://platform.claude.com/docs/en/models/overview.md"  # fixed on purpose
+HERE = Path(__file__).parent
+SEEN = HERE / "models" / "seen.json"
+REGISTRY = json.loads((HERE / "models" / "registry.json").read_text())
+
+try:
+    req = urllib.request.Request(URL, headers={"User-Agent": "jev-models-check/1.0 (personal script)"})
+    with urllib.request.urlopen(req, timeout=20) as r:
+        page = r.read().decode("utf-8", "replace")
+except Exception as e:
+    sys.exit("Could not read the models page (%s). Nothing changed." % type(e).__name__)
+found = sorted(set(re.findall(r"claude-(?:haiku|sonnet|opus|fable)-[0-9][a-z0-9.-]*", page)))
+seen = set(json.loads(SEEN.read_text())) if SEEN.exists() else set()
+routed = {t["model"] for t in REGISTRY["tiers"].values()}
+
+if "--mark-seen" in sys.argv:
+    SEEN.write_text(json.dumps(sorted(seen | set(found)), indent=2) + "\n")
+    print("Marked %d models as seen." % len(set(found)))
+    sys.exit(0)
+
+new = [m for m in found if m not in seen]
+print("Models on the page now:", ", ".join(found) or "none found (page format may have changed)")
+print("Used by routing       :", ", ".join(sorted(routed)))
+if not seen:
+    print("\nNothing recorded as seen yet. Run: jev-models-check --mark-seen")
+elif new:
+    print("\nNEW since last check:", ", ".join(new))
+    print("Routing is unchanged. To use one: add or edit a tier in models/registry.json")
+    print("(model id, max_output_tokens, max_input_tokens, drop_betas, supports_* flags),")
+    print("test it with JEV_FORCE_TIER, then run: jev-models-check --mark-seen")
+else:
+    print("\nNo new models.")
+not_routed = [m for m in found if m in seen and m not in routed and not m.endswith("-latest")]
+if not_routed:
+    print("Seen but not used in routing:", ", ".join(not_routed))

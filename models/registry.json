@@ -1,0 +1,31 @@
+{
+  "_note": "Models the router may choose. New models are added here deliberately, never automatically.",
+  "default_tier": "sonnet",
+  "tiers": {
+    "haiku": {
+      "model": "claude-haiku-4-5-20251001",
+      "use_for": "small, simple, well-defined tasks",
+      "max_output_tokens": 64000,
+      "supports_adaptive_thinking": false,
+      "supports_effort": false,
+      "drop_betas": [
+        "effort-",
+        "per-turn-control-",
+        "thinking-token-count-",
+        "mid-conversation-tool-changes-",
+        "advisor-tool-",
+        "mid-conversation-system-"
+      ],
+      "supports_system_role_messages": false,
+      "max_input_tokens": 200000
+    },
+    "sonnet": {
+      "model": "claude-sonnet-5-5",
+      "use_for": "everyday coding and the safe default"
+    },
+    "opus": {
+      "model": "claude-opus-5-5",
+      "use_for": "hard design, debugging and deep reasoning"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+#!/bin/sh
+# Control the local Jev gateway: jevctl on | off | shadow | status
+PORT="${JEV_PORT:-8787}"
+BASE="http://127.0.0.1:$PORT"
+H='x-jev-control: 1'
+case "${1:-status}" in
+  on|off|shadow)
+    curl -s --max-time 5 -X POST -H "$H" -H 'content-type: application/json' -d "{\"mode\":\"$1\"}" "$BASE/jev/mode" ;;
+  status)
+    curl -s --max-time 5 -H "$H" "$BASE/jev/status" ;;
+  *)
+    echo "usage: jevctl on|off|shadow|status"; exit 2 ;;
+esac
+code=$?
+[ $code -ne 0 ] && echo "gateway not reachable on port $PORT"
+echo
